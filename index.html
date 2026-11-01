@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="筋トレ記録">
+  <title>筋トレ記録</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="storage-warning" class="warning" hidden>記録が保存できません（プライベートブラウズ中などは保存されません）</div>
+  <main id="view"></main>
+  <nav class="tabbar" aria-label="メニュー">
+    <button type="button" data-tab="train"><span class="tab-icon" aria-hidden="true">🏋️</span>トレーニング</button>
+    <button type="button" data-tab="calendar"><span class="tab-icon" aria-hidden="true">📅</span>カレンダー</button>
+    <button type="button" data-tab="stats"><span class="tab-icon" aria-hidden="true">📊</span>記録</button>
+  </nav>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
