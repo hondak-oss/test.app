@@ -82,17 +82,31 @@ export function renderStats(el, ctx) {
     el.querySelectorAll('[data-rest]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
   }));
 
-  el.querySelector('[data-export]').addEventListener('click', () => {
-    const blob = new Blob([ctx.store.exportJSON()], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+  el.querySelector('[data-export]').addEventListener('click', async () => {
+    const name = `kintore-backup-${today}.json`;
+    const json = ctx.store.exportJSON();
+    msg.classList.remove('is-error');
+    // iPhone では共有シートから「"ファイル"に保存」を選んでもらうのが確実
+    const file = typeof File === 'function' ? new File([json], name, { type: 'application/json' }) : null;
+    if (file && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: '筋トレ記録のバックアップ' });
+        msg.textContent = 'バックアップを保存しました';
+      } catch (e) {
+        msg.textContent = e?.name === 'AbortError' ? '書き出しをキャンセルしました' : '書き出せませんでした。もう一度お試しください';
+        if (e?.name !== 'AbortError') msg.classList.add('is-error');
+      }
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `kintore-backup-${today}.json`;
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    msg.textContent = '書き出しました。「ファイル」アプリなどに保存してください';
+    setTimeout(() => URL.revokeObjectURL(url), 60000); // 保存先を選ぶ時間を確保する
+    msg.textContent = `「${name}」を保存してください（「ファイル」アプリなどに）`;
   });
 
   const fileInput = el.querySelector('[data-file]');

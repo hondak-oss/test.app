@@ -53,3 +53,14 @@ test('状態は元のオブジェクトを書き換えない', () => {
   afterVideo(s0, 100);
   assert.equal(s0.phase, 'playing');
 });
+
+import { restRemaining } from '../js/session.js';
+
+test('休憩の残り秒数は実際の時刻から計算する（画面ロック中も進む）', () => {
+  const start = 1_000_000;
+  const endAt = start + 60_000;
+  assert.equal(restRemaining(endAt, start), 60);
+  assert.equal(restRemaining(endAt, start + 500), 60);
+  assert.equal(restRemaining(endAt, start + 1_000), 59);
+  assert.equal(restRemaining(endAt, start + 120_000), 0); // 2分ロックしたら終わっている
+});

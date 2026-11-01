@@ -1,36 +1,20 @@
 // 一通りモードの画面：再生 → 休憩（カウントダウン）→ 次の動画 … → 完了
 import { VIDEOS, getVideo } from '../videos.js';
-import { startSession, afterVideo, afterRest, quit, nextVideoId } from '../session.js';
-import { weekProgress, formatDuration } from '../stats.js';
+import { startSession, afterVideo, afterRest, quit, nextVideoId, restRemaining } from '../session.js';
+import { weekProgress, formatDuration, totals, recordsOn } from '../stats.js';
+import { createBeeper } from '../beeper.js';
 import { renderPlay } from './play.js';
 import { renderBody } from '../body.js';
 import { esc } from '../util.js';
 
-function createBeeper() {
-  // iPhone では音を鳴らすのにユーザー操作が必要なので、「一通りスタート」のタップ中に作っておく
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return { beep() {}, close() {} };
-  const ac = new AC();
-  ac.resume?.();
-  return {
-    beep() {
-      const osc = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.frequency.value = 880;
-      gain.gain.value = 0.2;
-      osc.connect(gain).connect(ac.destination);
-      osc.start();
-      osc.stop(ac.currentTime + 0.12);
-    },
-    close() { ac.close?.(); },
-  };
-}
-
 export function renderSession(el, ctx) {
   let s = startSession(VIDEOS.map((v) => v.id));
   let screenCleanup = null;
+  // iPhone では音を鳴らすのにユーザー操作が必要なので、「一通りスタート」のタップ中に作っておく
   const beeper = createBeeper();
   const total = s.videoIds.length;
+  // 画面内のボタンがタップされるたびに音声を再開できるようにしておく
+  el.addEventListener('click', beeper.unlock);
 
   function show() {
     if (screenCleanup) screenCleanup();
@@ -61,7 +45,8 @@ export function renderSession(el, ctx) {
   }
 
   function showResting() {
-    let remaining = ctx.store.getData().settings.restSeconds;
+    let endAt = Date.now() + ctx.store.getData().settings.restSeconds * 1000;
+    let remaining = restRemaining(endAt, Date.now());
     const next = getVideo(nextVideoId(s));
     el.innerHTML = `
       <div class="play-head">
@@ -86,31 +71,41 @@ export function renderSession(el, ctx) {
     const countEl = el.querySelector('[data-count]');
 
     const goNext = () => { s = afterRest(s); show(); };
-    const timer = setInterval(() => {
-      remaining -= 1;
-      if (remaining <= 0) { goNext(); return; }
+    // 画面ロック中は iPhone がタイマーを止めるので、終了時刻から残りを計算し直す
+    const update = () => {
+      const left = restRemaining(endAt, Date.now());
+      if (left <= 0) { goNext(); return; }
+      if (left !== remaining && left <= 3) beeper.beep();
+      remaining = left;
       countEl.textContent = remaining;
-      if (remaining <= 3) beeper.beep();
-    }, 1000);
+    };
+    const timer = setInterval(update, 250);
+    const onVisible = () => { if (document.visibilityState === 'visible') update(); };
+    document.addEventListener('visibilitychange', onVisible);
 
     el.querySelector('[data-plus]').addEventListener('click', () => {
-      remaining += 30;
-      countEl.textContent = remaining;
+      endAt += 30000;
+      update();
     });
     el.querySelector('[data-skip]').addEventListener('click', goNext);
     el.querySelector('[data-quit]').addEventListener('click', () => { s = quit(s); show(); });
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }
 
   function showDone() {
     const { records, settings } = ctx.store.getData();
-    const week = weekProgress(records, ctx.today(), settings.weeklyGoal);
+    const today = ctx.today();
+    const week = weekProgress(records, today, settings.weeklyGoal);
+    const todaySeconds = totals(recordsOn(records, today)).seconds;
     el.innerHTML = `
       <section class="done">
         <div class="done-emoji" aria-hidden="true">💪</div>
         <h1>おつかれさまでした！</h1>
         <div class="card done-stats">
-          <div><span class="muted">今日の合計時間</span><strong>${formatDuration(s.recordedSeconds)}</strong></div>
+          <div><span class="muted">今日の合計時間</span><strong>${formatDuration(todaySeconds)}</strong></div>
           <div><span class="muted">今週の進み具合</span><strong>今週 ${week.done}/${week.goal}日</strong></div>
         </div>
         ${week.achieved ? '<p class="achieved done-achieved">🎉 今週の目標達成！</p>' : ''}
@@ -123,6 +118,7 @@ export function renderSession(el, ctx) {
   show();
   return () => {
     if (screenCleanup) screenCleanup();
+    el.removeEventListener('click', beeper.unlock);
     beeper.close();
   };
 }

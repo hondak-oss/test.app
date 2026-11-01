@@ -46,6 +46,7 @@ export function createPlayer(el, youtubeId, { autoplay = false, onEnded, onError
   const isPlaying = () => !!player?.getPlayerState && player.getPlayerState() === window.YT.PlayerState.PLAYING;
 
   const tick = () => {
+    if (destroyed) return;
     if (isPlaying()) {
       seconds += 1;
       onTick?.(seconds);
@@ -58,8 +59,10 @@ export function createPlayer(el, youtubeId, { autoplay = false, onEnded, onError
       videoId: youtubeId,
       playerVars: { playsinline: 1, rel: 0, autoplay: autoplay ? 1 : 0 },
       events: {
-        onReady: () => { if (autoplay) player.playVideo(); },
+        onReady: () => { if (!destroyed && autoplay) player.playVideo(); },
         onStateChange: (e) => {
+          // 破棄後に届いたイベントは無視する（やめた動画を記録しないため）
+          if (destroyed) return;
           if (e.data === window.YT.PlayerState.ENDED) onEnded?.();
         },
         onError: showError,
