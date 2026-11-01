@@ -4,6 +4,7 @@ import { toDateKey, formatDuration } from './stats.js';
 import { getVideo } from './videos.js';
 import { renderTrain } from './views/train.js';
 import { renderPlay } from './views/play.js';
+import { renderSession } from './views/session.js';
 
 const view = document.getElementById('view');
 const tabButtons = document.querySelectorAll('.tabbar button');
@@ -29,6 +30,7 @@ const VIEWS = {
   calendar: { tab: 'calendar', render: (el) => { el.innerHTML = '<h1>カレンダー</h1>'; } },
   stats: { tab: 'stats', render: (el) => { el.innerHTML = '<h1>記録</h1>'; } },
   play: { tab: 'train', render: renderSinglePlay },
+  session: { tab: 'train', render: renderSession },
 };
 
 export function navigate(name, params = {}) {
