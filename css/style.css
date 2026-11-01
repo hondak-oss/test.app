@@ -86,3 +86,30 @@ button { font: inherit; color: inherit; }
 }
 .tabbar button[aria-current="page"] { color: var(--accent); }
 .tab-icon { font-size: 1.35rem; line-height: 1; }
+
+/* ---- 人体図 ---- */
+.body-diagram { display: flex; justify-content: center; gap: 8px; }
+.body-figure { margin: 0; flex: 1; max-width: 150px; text-align: center; }
+.body-figure svg { width: 100%; height: auto; display: block; }
+.body-figure figcaption { color: var(--muted); font-size: 0.85rem; }
+.silhouette > * { fill: var(--body); }
+.muscle { fill: var(--muscle-off); }
+.muscle.is-main { fill: var(--accent); animation: glow-main 2s ease-in-out infinite; }
+.muscle.is-sub { fill: var(--accent); opacity: 0.35; animation: glow-sub 2s ease-in-out infinite; }
+@keyframes glow-main { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes glow-sub { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .muscle.is-main, .muscle.is-sub { animation: none; }
+  .muscle.is-main { opacity: 1; }
+}
+
+.muscle-cards { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.muscle-card { background: var(--surface); border-radius: 12px; padding: 12px 14px; border-left: 4px solid var(--accent); }
+.muscle-card.is-sub { border-left-color: rgba(255, 138, 0, 0.4); }
+.muscle-card p { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
+.muscle-nick { color: var(--muted); font-size: 0.92rem; }
+.muscle-tag {
+  display: inline-block; margin-right: 6px; padding: 1px 8px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); font-size: 0.75rem; font-weight: 700; vertical-align: 2px;
+}
+.muscle-card.is-sub .muscle-tag { background: var(--surface-2); color: var(--muted); }
