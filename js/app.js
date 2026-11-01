@@ -5,6 +5,7 @@ import { getVideo } from './videos.js';
 import { renderTrain } from './views/train.js';
 import { renderPlay } from './views/play.js';
 import { renderSession } from './views/session.js';
+import { renderCalendar } from './views/calendar.js';
 
 const view = document.getElementById('view');
 const tabButtons = document.querySelectorAll('.tabbar button');
@@ -27,7 +28,7 @@ const ctx = {
 // 各画面：render(el, ctx, params) は後片付け関数を返してもよい
 const VIEWS = {
   train: { tab: 'train', render: renderTrain },
-  calendar: { tab: 'calendar', render: (el) => { el.innerHTML = '<h1>カレンダー</h1>'; } },
+  calendar: { tab: 'calendar', render: renderCalendar },
   stats: { tab: 'stats', render: (el) => { el.innerHTML = '<h1>記録</h1>'; } },
   play: { tab: 'train', render: renderSinglePlay },
   session: { tab: 'train', render: renderSession },
