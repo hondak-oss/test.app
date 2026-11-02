@@ -3,8 +3,10 @@ import { getVideo } from './videos.js';
 
 export const STORAGE_KEY = 'kintore.v1';
 export const MIN_SECONDS = 30;
-export const DEFAULT_SETTINGS = Object.freeze({ weeklyGoal: 3, restSeconds: 60 });
+export const DEFAULT_SETTINGS = Object.freeze({ weeklyGoal: 3, restSeconds: 60, playMode: 'youtube' });
 export const REST_CHOICES = [30, 60, 90];
+// youtube = YouTubeアプリで開く（プレミアムなら広告なし）、app = このアプリの中で再生
+export const PLAY_MODES = ['youtube', 'app'];
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -21,6 +23,7 @@ function cleanSettings(raw) {
   if (raw && typeof raw === 'object') {
     if (Number.isInteger(raw.weeklyGoal) && raw.weeklyGoal >= 1 && raw.weeklyGoal <= 7) s.weeklyGoal = raw.weeklyGoal;
     if (REST_CHOICES.includes(raw.restSeconds)) s.restSeconds = raw.restSeconds;
+    if (PLAY_MODES.includes(raw.playMode)) s.playMode = raw.playMode;
   }
   return s;
 }

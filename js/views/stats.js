@@ -1,6 +1,8 @@
 // 記録タブ：まとめ・動画別・部位別・設定・バックアップ。
 import { VIDEOS, MUSCLES } from '../videos.js';
 import { REST_CHOICES } from '../storage.js';
+
+const PLAY_MODE_LABELS = [['youtube', 'YouTubeアプリ'], ['app', 'アプリ内']];
 import { totals, currentStreak, longestStreak, byVideo, byMuscle, formatDuration } from '../stats.js';
 import { esc } from '../util.js';
 
@@ -58,6 +60,13 @@ export function renderStats(el, ctx) {
           ${REST_CHOICES.map((n) => `<button type="button" role="radio" aria-checked="${n === settings.restSeconds}" data-rest="${n}">${n}秒</button>`).join('')}
         </div>
       </div>
+      <div class="setting-row setting-col">
+        <span>再生方法</span>
+        <div class="segmented" role="radiogroup" aria-label="再生方法">
+          ${PLAY_MODE_LABELS.map(([v, label]) => `<button type="button" role="radio" aria-checked="${v === settings.playMode}" data-play-mode="${v}">${label}</button>`).join('')}
+        </div>
+        <p class="muted setting-help">「YouTubeアプリ」はYouTubeアプリで開いて再生します（プレミアムなら広告なし）。終わったら戻って「完了」を押します。</p>
+      </div>
     </section>
 
     <h2>バックアップ</h2>
@@ -80,6 +89,11 @@ export function renderStats(el, ctx) {
   el.querySelectorAll('[data-rest]').forEach((b) => b.addEventListener('click', () => {
     ctx.store.updateSettings({ restSeconds: Number(b.dataset.rest) });
     el.querySelectorAll('[data-rest]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+  }));
+
+  el.querySelectorAll('[data-play-mode]').forEach((b) => b.addEventListener('click', () => {
+    ctx.store.updateSettings({ playMode: b.dataset.playMode });
+    el.querySelectorAll('[data-play-mode]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
   }));
 
   el.querySelector('[data-export]').addEventListener('click', async () => {

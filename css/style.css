@@ -228,3 +228,15 @@ button { font: inherit; color: inherit; }
 .backup-actions .btn { flex: 1; }
 .backup-msg:not(:empty) { margin: 10px 0 0; font-size: 0.9rem; color: var(--accent); }
 .backup-msg.is-error { color: var(--danger); }
+
+/* ---- YouTubeアプリで開く ---- */
+.yt-poster {
+  position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden;
+  background: #000; text-decoration: none; color: inherit;
+}
+.yt-poster img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; display: block; }
+.yt-poster .btn { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+.open-yt-link { margin-top: 10px; text-decoration: none; font-size: 0.9rem; }
+.yt-note { margin: 10px 0 0; color: var(--accent); }
+.setting-col { flex-wrap: wrap; }
+.setting-help { flex-basis: 100%; margin: 0; font-size: 0.8rem; }

@@ -17,13 +17,13 @@ const rec = (date, videoId = 'core5', seconds = 120) => ({ date, videoId, second
 test('定数がspecどおり', () => {
   assert.equal(STORAGE_KEY, 'kintore.v1');
   assert.equal(MIN_SECONDS, 30);
-  assert.deepEqual(DEFAULT_SETTINGS, { weeklyGoal: 3, restSeconds: 60 });
+  assert.deepEqual(DEFAULT_SETTINGS, { weeklyGoal: 3, restSeconds: 60, playMode: 'youtube' });
 });
 
 test('空のbackendなら空の記録と初期設定', () => {
   const s = createStore(fakeBackend());
   assert.equal(s.available, true);
-  assert.deepEqual(s.getData(), { records: [], settings: { weeklyGoal: 3, restSeconds: 60 } });
+  assert.deepEqual(s.getData(), { records: [], settings: { weeklyGoal: 3, restSeconds: 60, playMode: 'youtube' } });
 });
 
 test('29秒は記録しない、30秒は記録する', () => {
@@ -78,8 +78,10 @@ test('範囲外・選択肢外の設定は無視する', () => {
   s.updateSettings({ restSeconds: 45 });
   s.updateSettings({ weeklyGoal: 0 });
   assert.deepEqual(s.getData().settings, DEFAULT_SETTINGS);
-  s.updateSettings({ weeklyGoal: 7, restSeconds: 30 });
-  assert.deepEqual(s.getData().settings, { weeklyGoal: 7, restSeconds: 30 });
+  s.updateSettings({ playMode: 'tv' });
+  assert.deepEqual(s.getData().settings, DEFAULT_SETTINGS);
+  s.updateSettings({ weeklyGoal: 7, restSeconds: 30, playMode: 'app' });
+  assert.deepEqual(s.getData().settings, { weeklyGoal: 7, restSeconds: 30, playMode: 'app' });
 });
 
 test('exportJSON → importJSON で元に戻る', () => {
@@ -132,4 +134,9 @@ test('backendが無くても動く', () => {
   const s = createStore(null);
   assert.equal(s.available, false);
   assert.ok(s.addRecord(rec('2026-11-01')));
+});
+
+test('再生方法の設定が無い古いデータは YouTubeアプリ にする', () => {
+  const s = createStore(fakeBackend(JSON.stringify({ records: [], settings: { weeklyGoal: 4, restSeconds: 90 } })));
+  assert.deepEqual(s.getData().settings, { weeklyGoal: 4, restSeconds: 90, playMode: 'youtube' });
 });
